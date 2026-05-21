@@ -170,7 +170,7 @@ class StudentManager:
             self.conn = pymysql.connect(
                 host="localhost",
                 user="root",          # 改为自己的MySQL账号
-                password="root123456",# 改为自己的MySQL密码
+                password="123456",# 改为自己的MySQL密码
                 database="student_db",
                 charset="utf8mb4",
                 autocommit=False
@@ -179,6 +179,13 @@ class StudentManager:
             print("✅ 数据库连接成功（双表模式）")
         except Exception as e:
             print("❌ 数据库连接失败：", e)
+
+    # 数据库验证管理员登录
+    def admin_login_from_db(self, username, password):
+        sql = "SELECT * FROM administer WHERE user_name=%s AND password=%s"
+        self.cursor.execute(sql, (username, password))
+        res = self.cursor.fetchone()
+        return res is not None
 
     # 日志记录工具
     def write_log(self, msg):
@@ -311,6 +318,20 @@ class StudentManager:
 # 主菜单函数
 def main():
     sm = StudentManager()
+    
+    if not sm.conn:
+        return
+
+    print("\n============ 管理员登录 ============")
+    while True:
+        username = input("请输入管理员账号：")
+        password = input("请输入管理员密码：")
+        
+        if sm.admin_login_from_db(username, password):
+            print("登录成功，进入系统")
+            break
+        else:
+            print("账号或密码错误，请重新输入\n")
     while True:
         print("\n======= 学生信息成绩管理系统【双表版】=======")
         print("1. 添加学生（含成绩录入）")
