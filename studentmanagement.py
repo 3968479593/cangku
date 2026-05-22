@@ -301,37 +301,62 @@ class StudentManager:
             self.conn.commit()
 
             if self.cursor.rowcount > 0:
-                print("✅ 学生信息及对应成绩已全部删除")
+                print("学生信息及对应成绩已全部删除")
                 self.write_log(f"删除学生数据：学号{stu_id}")
             else:
                 print("❌ 未找到该学生")
         except:
             self.conn.rollback()
             print("❌ 删除失败")
+    def borrow_book(self, book_id): 
+        try:
+            sql_check = "SELECT zhuangtai FROM book WHERE book_id=%s"
+            self.cursor.execute(sql_check, (book_id,))
+            book = self.cursor.fetchone()
+
+            if not book:
+                print("未找到该书籍！")
+                return
+
+            status = book[0]
+            if status == "已借出":
+                print("该书已被借出，无法借阅！")
+                return
+
+            sql_update = "UPDATE book SET zhuangtai=%s WHERE book_id=%s"
+            self.cursor.execute(sql_update, ("已借出", book_id))
+            self.conn.commit()
+
+            print("图书借阅成功！")
+            self.write_log(f"借阅：书籍编号{book_id}")
+
+        except Exception as e:
+            self.conn.rollback()
+            print("借阅失败：", e)
 
     # 关闭数据库连接
     def close(self):
         self.cursor.close()
         self.conn.close()
-        print("✅ 数据库连接已关闭")
+        print("数据库连接已关闭")
 
 # 主菜单函数
 def main():
     sm = StudentManager()
     
-    if not sm.conn:
-        return
+    # if not sm.conn:
+    #     return
 
-    print("\n============ 管理员登录 ============")
-    while True:
-        username = input("请输入管理员账号：")
-        password = input("请输入管理员密码：")
+    # print("\n============ 管理员登录 ============")
+    # while True:
+    #     username = input("请输入管理员账号：")
+    #     password = input("请输入管理员密码：")
         
-        if sm.admin_login_from_db(username, password):
-            print("登录成功，进入系统")
-            break
-        else:
-            print("账号或密码错误，请重新输入\n")
+    #     if sm.admin_login_from_db(username, password):
+    #         print("登录成功，进入系统")
+    #         break
+    #     else:
+    #         print("账号或密码错误，请重新输入\n")
     while True:
         print("\n======= 学生信息成绩管理系统【双表版】=======")
         print("1. 添加学生（含成绩录入）")
@@ -378,6 +403,9 @@ def main():
         elif choice == "6":
             sid = input("请输入要删除的学号：")
             sm.delete_student(sid)
+        elif choice == "7":
+            book_id = input("请输入想借阅的书籍：")
+            sm.borrow_book(book_id)
 
         elif choice == "0":
             sm.close()
