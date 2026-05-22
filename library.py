@@ -36,17 +36,17 @@ class libraryManager:
             sql_check = "SELECT * FROM student WHERE student_id=%s"
             self.cursor.execute(sql_check, (student_id,))
             if self.cursor.fetchone():
-                print("❌ 该账号已被注册！")
+                print("该账号已被注册！")
                 return False
             sql = "INSERT INTO student(student_id, password) VALUES(%s, %s)"
             self.cursor.execute(sql, (student_id, password))
             self.conn.commit()
-            print("✅ 注册成功，请登录！")
+            print("注册成功，请登录！")
             self.write_log(f"新学生账号注册：{student_id}")
             return True
         except Exception as e:
             self.conn.rollback()
-            print("❌ 注册失败：", e)
+            print("注册失败：", e)
             return False
 
     # 日志
@@ -55,15 +55,13 @@ class libraryManager:
         with open("log.txt", "a", encoding="utf-8") as f:
             f.write(f"[{now}] {msg}\n")
 
-    # ===================== 数据校验强化 =====================
-    # 1. 添加图书：图书编号唯一校验
+    # 1. 添加图书
     def add_book(self,book_id,name,author,leibie):
         try:
-            # 校验图书编号是否已存在
             sql_check = "SELECT * FROM book WHERE book_id=%s"
             self.cursor.execute(sql_check, (book_id,))
             if self.cursor.fetchone():
-                print("❌ 图书编号已存在，禁止重复添加！")
+                print("图书编号已存在，禁止重复添加！")
                 return
             sql = "INSERT INTO book(book_id,name,author,leibie) VALUES(%s,%s,%s,%s)"
             self.cursor.execute(sql, (book_id,name,author,leibie))
@@ -72,7 +70,7 @@ class libraryManager:
             self.write_log(f"管理员添加图书：{book_id}")
         except Exception as e:
             self.conn.rollback()
-            print("❌ 添加失败")
+            print("添加失败")
 
     # 查看所有
     def show_all(self):
@@ -261,7 +259,7 @@ def main():
         if is_admin:
             print("1 添加图书")
             print("2 查看全部")
-            print("3 图书查询（高级）")
+            print("3 图书查询")
             print("4 修改图书")
             print("5 删除图书")
             print("6 借阅图书")
@@ -269,7 +267,7 @@ def main():
             print("0 退出")
         else:
             print("2 查看全部图书")
-            print("3 图书查询（高级）")
+            print("3 图书查询")
             print("6 借阅图书")
             print("7 归还图书")
             print("0 退出")
